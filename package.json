@@ -18,5 +18,8 @@
     "@tailwindcss/oxide": true,
     "sharp": true,
     "unrs-resolver": true
+  },
+  "dependencies": {
+    "next": "^15.5.28"
   }
 }
