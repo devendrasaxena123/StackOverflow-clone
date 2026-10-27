@@ -28,6 +28,8 @@ app.get("/time-info", (req, res) => {
   res.json(getISTInfo());
 });
 
+let lastMongoError = null;
+
 app.get("/db-status", (req, res) => {
   const states = ["disconnected", "connected", "connecting", "disconnecting"];
   res.json({
@@ -35,6 +37,7 @@ app.get("/db-status", (req, res) => {
     dbState: states[mongoose.connection.readyState] || mongoose.connection.readyState,
     hasMongoUrlEnv: !!process.env.MONGODB_URL,
     mongoHost: mongoose.connection.host || "none",
+    lastMongoError: lastMongoError || "none",
     istTime: getISTInfo().timeString,
   });
 });
@@ -57,9 +60,11 @@ app.listen(PORT, "0.0.0.0", () => {
 mongoose
   .connect(databaseurl)
   .then(() => {
+    lastMongoError = null;
     console.log("✅ Connected to MongoDB");
   })
   .catch((err) => {
+    lastMongoError = err.message;
     console.error("❌ MongoDB connection error:", err.message);
     if (!process.env.MONGODB_URL) {
       console.warn(
