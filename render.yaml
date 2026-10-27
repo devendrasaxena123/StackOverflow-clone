@@ -17,4 +17,4 @@ services:
       - key: MONGODB_URL
         sync: false
       - key: CLIENT_URL
-        value: "*"
+        value: "https://stack-overflow-clone-git-vercel-react-server-33526f-devendra22.vercel.app"
