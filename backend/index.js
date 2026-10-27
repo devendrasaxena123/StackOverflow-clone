@@ -38,15 +38,21 @@ const PORT = process.env.PORT || 5000;
 const databaseurl =
   process.env.MONGODB_URL || "mongodb://127.0.0.1:27017/stackoverflow";
 
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`🕒 Server IST Time: ${getISTInfo().timeString}`);
+});
+
 mongoose
   .connect(databaseurl)
   .then(() => {
     console.log("✅ Connected to MongoDB");
-    app.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT}`);
-      console.log(`🕒 Server IST Time: ${getISTInfo().timeString}`);
-    });
   })
   .catch((err) => {
     console.error("❌ MongoDB connection error:", err.message);
+    if (!process.env.MONGODB_URL) {
+      console.warn(
+        "⚠️ Warning: MONGODB_URL environment variable is not set on Render. Please configure MONGODB_URL in your Render Web Service Environment settings (e.g., from MongoDB Atlas)."
+      );
+    }
   });

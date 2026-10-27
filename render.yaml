@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: stackoverflow-clone-backend
+    runtime: node
+    rootDir: backend
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: MONGODB_URL
+        sync: false
+      - key: CLIENT_URL
+        value: "*"
