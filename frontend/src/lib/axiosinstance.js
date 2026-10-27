@@ -4,7 +4,7 @@ const axiosInstance = axios.create({
   baseURL:
     process.env.NEXT_PUBLIC_BACKEND_URL ||
     process.env.BACKEND_URL ||
-    "http://localhost:5000",
+    "https://stackoverflow-clone-1-vlvp.onrender.com",
   headers: {
     "Content-Type": "application/json",
   },

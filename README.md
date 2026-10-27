@@ -56,7 +56,7 @@ npm run dev
 ```
 
 - **Frontend URL:** [http://localhost:3000](http://localhost:3000)
-- **Backend API URL:** [http://localhost:5000](http://localhost:5000)
+- **Backend API URL:** [https://stackoverflow-clone-1-vlvp.onrender.com](https://stackoverflow-clone-1-vlvp.onrender.com)
 
 ---
 
