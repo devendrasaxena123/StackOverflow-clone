@@ -17,4 +17,4 @@ services:
       - key: MONGODB_URL
         sync: false
       - key: CLIENT_URL
-        value: "https://stack-overflow-clone-git-vercel-react-server-33526f-devendra22.vercel.app"
+        value: "https://stackoverflow-clone12.netlify.app"

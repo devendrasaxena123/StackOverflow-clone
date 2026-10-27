@@ -55,7 +55,7 @@ cd frontend
 npm run dev
 ```
 
-- **Frontend URL:** [https://stack-overflow-clone-git-vercel-react-server-33526f-devendra22.vercel.app](https://stack-overflow-clone-git-vercel-react-server-33526f-devendra22.vercel.app)
+- **Frontend URL:** [https://stackoverflow-clone12.netlify.app](https://stackoverflow-clone12.netlify.app)
 - **Backend API URL:** [https://stackoverflow-clone-1-vlvp.onrender.com](https://stackoverflow-clone-1-vlvp.onrender.com)
 
 ---
