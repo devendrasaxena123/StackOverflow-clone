@@ -1,0 +1,13 @@
+# Netlify Configuration for Stack Overflow Clone
+[build]
+  base = "frontend"
+  command = "npm run build"
+  publish = "frontend/.next"
+
+[build.environment]
+  NODE_VERSION = "20"
+  NEXT_PUBLIC_BACKEND_URL = "https://stackoverflow-clone-1-vlvp.onrender.com"
+  BACKEND_URL = "https://stackoverflow-clone-1-vlvp.onrender.com"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
