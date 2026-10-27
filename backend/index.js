@@ -28,6 +28,17 @@ app.get("/time-info", (req, res) => {
   res.json(getISTInfo());
 });
 
+app.get("/db-status", (req, res) => {
+  const states = ["disconnected", "connected", "connecting", "disconnecting"];
+  res.json({
+    status: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
+    dbState: states[mongoose.connection.readyState] || mongoose.connection.readyState,
+    hasMongoUrlEnv: !!process.env.MONGODB_URL,
+    mongoHost: mongoose.connection.host || "none",
+    istTime: getISTInfo().timeString,
+  });
+});
+
 app.use("/user", userroutes);
 app.use("/question", questionroute);
 app.use("/answer", answerroutes);
