@@ -159,7 +159,7 @@ export const Login = async (req, res) => {
         ip: clientIp,
         message:
           "Google Chrome detected: Access is granted only after OTP verification sent to your email.",
-        devOtp: process.env.NODE_ENV !== "production" ? otp : undefined, // For ease of testing
+        devOtp: (!process.env.SMTP_USER || process.env.NODE_ENV !== "production") ? otp : undefined, // Provided for testing when SMTP not configured
       });
     }
 
@@ -311,7 +311,7 @@ export const RequestForgotPassword = async (req, res) => {
       generatedPassword, // User can choose to accept this generated password!
       email: targetUser.email,
       phone: targetUser.phone,
-      devOtp: process.env.NODE_ENV !== "production" ? otp : undefined,
+      devOtp: (!process.env.SMTP_USER || process.env.NODE_ENV !== "production") ? otp : undefined,
     });
   } catch (error) {
     console.error("RequestForgotPassword error:", error);
@@ -394,7 +394,7 @@ export const RequestLanguageSwitchOtp = async (req, res) => {
         message: "OTP sent to your registered email for French verification.",
         verificationType: "email",
         identifier: targetEmail,
-        devOtp: process.env.NODE_ENV !== "production" ? otp : undefined,
+        devOtp: (!process.env.SMTP_USER || process.env.NODE_ENV !== "production") ? otp : undefined,
       });
     } else {
       // All other languages: Authenticate via Mobile Number
@@ -413,7 +413,7 @@ export const RequestLanguageSwitchOtp = async (req, res) => {
         message: `OTP sent to your registered mobile number (${phoneToUse}) to switch language.`,
         verificationType: "mobile",
         identifier: phoneToUse,
-        devOtp: process.env.NODE_ENV !== "production" ? otp : undefined,
+        devOtp: (!process.env.SMTP_USER || process.env.NODE_ENV !== "production") ? otp : undefined,
       });
     }
   } catch (error) {

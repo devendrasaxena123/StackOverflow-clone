@@ -34,8 +34,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       browser = "Apple Safari";
     }
 
-    const isMobile =
-      /android|iphone|ipad|ipod|mobile/i.test(ua) || window.innerWidth < 768;
+    const isMobile = /android|iphone|ipad|ipod|mobile/i.test(ua);
     const device = isMobile ? "mobile" : "desktop";
 
     return { browser, device, isMobile };
