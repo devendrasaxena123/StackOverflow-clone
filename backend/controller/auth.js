@@ -80,15 +80,14 @@ export const Login = async (req, res) => {
       return res.status(400).json({ message: "Invalid password" });
     }
 
-    // 1. Detect Device & Browser Information
+    // Detect Device & Browser Information for history
     const userAgent = req.headers["user-agent"] || "";
     const parser = new UAParser(userAgent);
     const uaResult = parser.getResult();
 
-    const browserName = clientBrowser || uaResult.browser.name || "Unknown Browser";
-    const osName = uaResult.os.name || "Unknown OS";
-    
-    // Determine device category
+    const browserName = clientBrowser || uaResult.browser.name || "Browser";
+    const osName = uaResult.os.name || "OS";
+
     let deviceCategory = "desktop";
     if (
       clientDevice === "mobile" ||
@@ -97,74 +96,15 @@ export const Login = async (req, res) => {
       /android|iphone|ipad|ipod|mobile/i.test(userAgent)
     ) {
       deviceCategory = "mobile";
-    } else if (/laptop/i.test(userAgent) || osName.includes("Mac") || osName.includes("Windows")) {
-      deviceCategory = "desktop/laptop";
     }
 
-    // Get client IP address
     const clientIp =
       req.headers["x-forwarded-for"]?.split(",")[0].trim() ||
       req.socket?.remoteAddress ||
       "127.0.0.1";
 
-    // 2. Mobile Device Restriction: ONLY allowed between 10:00 AM and 1:00 PM IST
-    if (deviceCategory === "mobile") {
-      const allowed = isMobileLoginTime();
-      if (!allowed) {
-        const ist = getISTInfo();
-        return res.status(403).json({
-          message:
-            "Mobile logins are only allowed between 10:00 AM and 1:00 PM IST. Current time: " +
-            ist.timeString,
-          error: "MOBILE_LOGIN_TIME_RESTRICTED",
-          istTime: ist.timeString,
-        });
-      }
-    }
-
-    // 3. Browser-specific Authentication:
-    // If Google Chrome => require OTP verification sent to email
-    const isChrome =
-      browserName.toLowerCase().includes("chrome") &&
-      !browserName.toLowerCase().includes("edg") &&
-      !browserName.toLowerCase().includes("opr");
-
-    // If Microsoft browser (Edge, IE) => direct login without additional authentication
-    const isMicrosoft =
-      browserName.toLowerCase().includes("edge") ||
-      browserName.toLowerCase().includes("edg") ||
-      browserName.toLowerCase().includes("internet explorer") ||
-      browserName.toLowerCase().includes("ie");
-
-    if (isChrome) {
-      // Generate OTP and store in DB
-      const otp = generateOTP();
-      await otpModel.deleteMany({ identifier: email, purpose: "login_chrome" });
-      await otpModel.create({
-        identifier: email,
-        otp,
-        purpose: "login_chrome",
-        expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 min
-      });
-
-      // Send OTP via email
-      await sendOtpEmail(email, otp, "Google Chrome Login Verification");
-
-      return res.status(200).json({
-        requiresOtp: true,
-        email: existingUser.email,
-        browser: browserName,
-        os: osName,
-        deviceType: deviceCategory,
-        ip: clientIp,
-        message:
-          "Google Chrome detected: Access is granted only after OTP verification sent to your email.",
-        devOtp: (!process.env.SMTP_USER || process.env.NODE_ENV !== "production") ? otp : undefined, // Provided for testing when SMTP not configured
-      });
-    }
-
-    // For Microsoft browsers or other direct access browsers:
     // Record login in user's login history
+    if (!existingUser.loginHistory) existingUser.loginHistory = [];
     existingUser.loginHistory.unshift({
       browser: browserName,
       os: osName,
@@ -172,7 +112,6 @@ export const Login = async (req, res) => {
       ip: clientIp,
       loginAt: new Date(),
     });
-    // Keep max 50 entries
     if (existingUser.loginHistory.length > 50) {
       existingUser.loginHistory = existingUser.loginHistory.slice(0, 50);
     }
@@ -187,9 +126,7 @@ export const Login = async (req, res) => {
     res.status(200).json({
       data: existingUser,
       token,
-      message: isMicrosoft
-        ? "Microsoft browser detected: Access granted without additional authentication."
-        : "Login successful.",
+      message: "Login successful.",
     });
   } catch (error) {
     console.error("Login error:", error);
@@ -311,7 +248,7 @@ export const RequestForgotPassword = async (req, res) => {
       generatedPassword, // User can choose to accept this generated password!
       email: targetUser.email,
       phone: targetUser.phone,
-      devOtp: (!process.env.SMTP_USER || process.env.NODE_ENV !== "production") ? otp : undefined,
+      devOtp: process.env.NODE_ENV !== "production" ? otp : undefined,
     });
   } catch (error) {
     console.error("RequestForgotPassword error:", error);
@@ -394,7 +331,7 @@ export const RequestLanguageSwitchOtp = async (req, res) => {
         message: "OTP sent to your registered email for French verification.",
         verificationType: "email",
         identifier: targetEmail,
-        devOtp: (!process.env.SMTP_USER || process.env.NODE_ENV !== "production") ? otp : undefined,
+        devOtp: process.env.NODE_ENV !== "production" ? otp : undefined,
       });
     } else {
       // All other languages: Authenticate via Mobile Number
@@ -413,7 +350,7 @@ export const RequestLanguageSwitchOtp = async (req, res) => {
         message: `OTP sent to your registered mobile number (${phoneToUse}) to switch language.`,
         verificationType: "mobile",
         identifier: phoneToUse,
-        devOtp: (!process.env.SMTP_USER || process.env.NODE_ENV !== "production") ? otp : undefined,
+        devOtp: process.env.NODE_ENV !== "production" ? otp : undefined,
       });
     }
   } catch (error) {

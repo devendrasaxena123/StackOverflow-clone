@@ -14,9 +14,16 @@ const getTransporter = async () => {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
       },
-      connectionTimeout: 4000,
-      greetingTimeout: 4000,
-      socketTimeout: 6000,
+    });
+  } else {
+    // Development fallback transporter (or logging transporter)
+    transporter = nodemailer.createTransport({
+      host: "smtp.ethereal.email",
+      port: 587,
+      auth: {
+        user: "test@ethereal.email",
+        pass: "testpass",
+      },
     });
   }
   return transporter;
@@ -30,24 +37,17 @@ export const sendEmail = async ({ to, subject, html, text }) => {
   if (text) console.log(`Text: ${text}`);
   console.log(`========================================\n`);
 
-  if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
-    console.log("ℹ️ No SMTP configuration set. Dispatch logged to console.");
-    return;
-  }
-
   try {
     const transport = await getTransporter();
-    if (transport) {
-      await transport.sendMail({
-        from: `"Stack Overflow Clone" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
-        to,
-        subject,
-        html,
-        text,
-      });
-    }
+    await transport.sendMail({
+      from: `"Stack Overflow Clone" <no-reply@stackoverflow-clone.local>`,
+      to,
+      subject,
+      html,
+      text,
+    });
   } catch (err) {
-    console.log("Notice: Email dispatch error:", err.message);
+    console.log("Notice: Email logged to console (SMTP fallback active):", err.message);
   }
 };
 

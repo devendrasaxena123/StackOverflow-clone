@@ -66,13 +66,6 @@ const AuthLoginPage = () => {
       return;
     }
 
-    if (environment.isMobile && isMobileRestricted) {
-      toast.error(
-        "Mobile logins are only allowed between 10:00 AM and 1:00 PM IST."
-      );
-      return;
-    }
-
     try {
       const result = await Login(form);
       if (result?.requiresOtp) {
@@ -83,9 +76,7 @@ const AuthLoginPage = () => {
         router.push("/");
       }
     } catch (error: any) {
-      if (error.response?.data?.error === "MOBILE_LOGIN_TIME_RESTRICTED") {
-        setIsMobileRestricted(true);
-      }
+      console.error(error);
     }
   };
 
@@ -133,66 +124,6 @@ const AuthLoginPage = () => {
             ? `Enter the 6-digit verification code sent to ${pendingEmail}`
             : "Enter your credentials to access Stack Overflow."}
         </p>
-
-        {/* ENVIRONMENT DETECTION BANNER */}
-        <div className="mb-6 p-3.5 rounded-xl bg-gray-50 border border-gray-200 text-xs">
-          <div className="flex items-center justify-between text-gray-700 font-semibold mb-1">
-            <span className="flex items-center gap-1.5">
-              <Globe className="w-3.5 h-3.5 text-blue-600" />
-              Detected Environment:
-            </span>
-            <span className="text-[11px] font-mono text-gray-500">
-              {environment.device === "mobile" ? "Mobile" : "Desktop/Laptop"}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2 mt-1">
-            <span className="font-bold text-gray-900">{environment.browser}</span>
-            {isEdge && (
-              <span className="bg-green-100 text-green-800 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-0.5">
-                <CheckCircle className="w-2.5 h-2.5" /> Direct Access (No OTP)
-              </span>
-            )}
-            {isChrome && (
-              <span className="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-0.5">
-                <ShieldCheck className="w-2.5 h-2.5" /> Email OTP Required
-              </span>
-            )}
-          </div>
-
-          <p className="text-[11px] text-gray-500 mt-2">
-            {isEdge
-              ? "Microsoft browser detected: Access is granted without additional authentication."
-              : isChrome
-              ? "Google Chrome detected: For enhanced security, access is granted only after email OTP verification."
-              : "Standard secure authentication."}
-          </p>
-        </div>
-
-        {/* MOBILE TIME RESTRICTION WARNING */}
-        {environment.isMobile && (
-          <div
-            className={`mb-6 p-3.5 rounded-xl border text-xs flex items-start gap-2.5 ${
-              isMobileRestricted
-                ? "bg-red-50 border-red-200 text-red-900"
-                : "bg-blue-50 border-blue-200 text-blue-900"
-            }`}
-          >
-            <Smartphone className="w-4 h-4 text-orange-600 shrink-0 mt-0.5" />
-            <div>
-              <strong className="font-bold">Mobile Device Policy:</strong>
-              <p className="mt-0.5 text-[11px]">
-                Mobile logins are time-restricted: allowed{" "}
-                <strong>ONLY between 10:00 AM and 1:00 PM IST</strong>.
-              </p>
-              {isMobileRestricted && (
-                <div className="mt-2 text-red-700 font-bold bg-white/80 p-2 rounded border border-red-200">
-                  ⛔ Access Denied: Outside mobile hours. Server time: {istTimeText}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
 
         {!isOtpStep ? (
           /* STEP 1: LOGIN FORM */
@@ -243,7 +174,7 @@ const AuthLoginPage = () => {
 
             <button
               type="submit"
-              disabled={loading || (environment.isMobile && isMobileRestricted)}
+              disabled={loading}
               className="w-full py-2.5 px-4 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-xl text-sm shadow-md transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? "Authenticating..." : "Log in"}
